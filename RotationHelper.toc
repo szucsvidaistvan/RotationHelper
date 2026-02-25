@@ -1,0 +1,7 @@
+## Interface: 30300
+## Author: Vida Istvan
+## Version: 0.1
+## Title: RotationHelper
+## Notes: Hunter RotationHelper.
+
+RotationHelper.lua
