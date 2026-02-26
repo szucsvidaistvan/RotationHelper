@@ -1,23 +1,71 @@
-#RotationHelper is a lightweight WOTLK 3.3.5a addon designed to help players optimize their damage rotation. The addon currently supports the Hunter class, with plans to expand support to all classes in the future. Its main goal is to provide clear, real-time ability recommendations based on priority logic.
+RotationHelper v0.3 – Summary
 
-## Features (Current Version) ##
+Version 0.3 introduces major usability improvements and a basic spell prediction system for Marksmanship Hunter (WotLK 3.3.5a).
 
-✅ Hunter class support
+🔧 New Features
 
-✅ Priority-based rotation logic
+1. Settings Menu Added
 
-✅ Lightweight and minimalistic design
+Integrated into the Interface Options panel.
 
-✅ Easy to extend for additional classes
+Lock/Unlock option to enable or disable frame movement.
 
-## Planned Features ##
+Visibility mode dropdown:
 
-🔄 Multi-class support
+Always On
 
-⚙️ Customizable rotation priority
+Combat or Target
 
-🎨 UI improvements
+Hidden
 
-🧠 Smart cooldown tracking
+Adjustable Spell Prediction Count slider (1–4 upcoming abilities).
 
-📊 Optional performance tracking
+2. Spell Prediction System
+
+Displays the next recommended abilities based on MM Hunter priority logic:
+
+Kill Shot (execute)
+
+Serpent Sting (maintenance)
+
+Chimera Shot
+
+Aimed Shot
+
+Arcane Shot
+
+Steady Shot (filler)
+
+Simulates short GCD offsets to predict upcoming spells.
+
+Prevents duplicate spell recommendations in the prediction chain (except Steady Shot).
+
+Prediction count is configurable via settings.
+
+3. Smart Visibility Modes
+
+Frame visibility can now be controlled:
+
+Always visible
+
+Only in combat or with a valid target
+
+Completely hidden
+
+4. Utility Indicators
+
+Aspect reminder (shows active Aspect or warning glow if missing).
+
+Hunter's Mark tracker (desaturates if already applied).
+
+Kill Command off-GCD flash indicator.
+
+Basic range check (main icon tint turns red if out of range).
+
+⚙️ Quality of Life
+
+Frame locking toggle via checkbox or /hh slash command.
+
+Automatically hides if player is not a Hunter.
+
+Stops updating during casting/channeling to avoid flicker.
