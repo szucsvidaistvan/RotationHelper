@@ -1,71 +1,52 @@
-RotationHelper v0.3 – Summary
+RotationHelper (v1.0) - Hunter Edition
+RotationHelper is a lightweight World of Warcraft addon designed specifically for Hunters to optimize their combat performance. It provides a clean, visual guide for your rotation and tracks essential buffs and debuffs in real-time.
 
-Version 0.3 introduces major usability improvements and a basic spell prediction system for Marksmanship Hunter (WotLK 3.3.5a).
+Features
+1. Smart Combat Rotation
+The addon predicts the next best ability to use based on priority, cooldowns, and the target's health:
 
-🔧 New Features
+Kill Shot: Automatically prioritized when the target is below 20% health.
 
-1. Settings Menu Added
+Serpent Sting: Tracks if the sting is active on your target.
 
-Integrated into the Interface Options panel.
+Core Priority: Manages the cooldowns for Chimera Shot, Aimed Shot, and Arcane Shot.
 
-Lock/Unlock option to enable or disable frame movement.
+Steady Shot: Suggested as a filler when all major abilities are on cooldown.
 
-Visibility mode dropdown:
+2. Status Tracking (Top Row)
+A dedicated row of icons tracks your combat readiness:
 
-Always On
+Aspect Tracking: Visual indicator of your active Aspect. Glows if no Aspect is active.
 
-Combat or Target
+Buff Monitoring: Tracks essential hunter buffs like Trueshot Aura.
 
-Hidden
+Hunter's Mark: Detects if the target has Hunter's Mark applied.
 
-Adjustable Spell Prediction Count slider (1–4 upcoming abilities).
+Serpent Sting Timer: Displays the remaining duration and cooldown status of your sting on the current target.
 
-2. Spell Prediction System
+3. Customization & UI
+Moveable Frame: Use the /rh command to unlock the frame. A green helper box appears to let you drag the addon anywhere on your screen. Position is saved automatically.
 
-Displays the next recommended abilities based on MM Hunter priority logic:
+Display Modes:
 
-Kill Shot (execute)
+Always On: Keep the addon visible at all times.
 
-Serpent Sting (maintenance)
+Target or Combat: Only shows the addon when you are in a fight or have a valid enemy targeted.
 
-Chimera Shot
+Hide: Completely hides the UI.
 
-Aimed Shot
+Adjustable Prediction: Choose how many future spells (up to 4) you want to see in the rotation sequence.
 
-Arcane Shot
+Slash Commands
+/rh - Locks or unlocks the addon frame for movement.
 
-Steady Shot (filler)
+Installation
+Download the repository.
 
-Simulates short GCD offsets to predict upcoming spells.
+Place the RotationHelper folder into your World of Warcraft Interface/AddOns/ directory.
 
-Prevents duplicate spell recommendations in the prediction chain (except Steady Shot).
+Restart the game or reload your UI.
 
-Prediction count is configurable via settings.
+Version: 1.0
 
-3. Smart Visibility Modes
-
-Frame visibility can now be controlled:
-
-Always visible
-
-Only in combat or with a valid target
-
-Completely hidden
-
-4. Utility Indicators
-
-Aspect reminder (shows active Aspect or warning glow if missing).
-
-Hunter's Mark tracker (desaturates if already applied).
-
-Kill Command off-GCD flash indicator.
-
-Basic range check (main icon tint turns red if out of range).
-
-⚙️ Quality of Life
-
-Frame locking toggle via checkbox or /hh slash command.
-
-Automatically hides if player is not a Hunter.
-
-Stops updating during casting/channeling to avoid flicker.
+Class Support: Hunter (Optimized for WotLK 3.3.5)
