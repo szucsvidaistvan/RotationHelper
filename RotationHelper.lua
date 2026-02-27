@@ -22,7 +22,6 @@ local function SetupOptions()
     lockCheck:SetScript("OnClick", function(self)
         isLocked = self:GetChecked()
         if RotationHelperDB then RotationHelperDB.isLocked = isLocked end
-        -- MOVE FIX 1: Pipa esetén tiltjuk/engedjük az egeret
         RotationHelperFrame:EnableMouse(not isLocked)
     end)
 
@@ -32,6 +31,8 @@ local function SetupOptions()
 
     local visDropdown = CreateFrame("Frame", "RH_VisDropdown", SettingsPanel, "UIDropDownMenuTemplate")
     visDropdown:SetPoint("TOPLEFT", visLabel, "BOTTOMLEFT", -15, -5)
+    -- MOD VÁLASZTÓ NAGYÍTÁSA
+    UIDropDownMenu_SetWidth(visDropdown, 200)
 
     UIDropDownMenu_Initialize(visDropdown, function(self)
         local info = UIDropDownMenu_CreateInfo()
@@ -54,6 +55,7 @@ local function SetupOptions()
 
     local countDropdown = CreateFrame("Frame", "RH_CountDropdown", SettingsPanel, "UIDropDownMenuTemplate")
     countDropdown:SetPoint("TOPLEFT", countLabel, "BOTTOMLEFT", -15, -5)
+    UIDropDownMenu_SetWidth(countDropdown, 100)
 
     UIDropDownMenu_Initialize(countDropdown, function(self)
         local info = UIDropDownMenu_CreateInfo()
@@ -73,12 +75,11 @@ SetupOptions()
 
 -- 2. Main Frame Setup
 local MainFrame = CreateFrame("Frame", "RotationHelperFrame", UIParent)
-MainFrame:SetSize(200, ICON_SIZE) -- Eredeti méret visszaállítva
+MainFrame:SetSize(200, ICON_SIZE)
 MainFrame:SetPoint("CENTER", 0, -150)
 MainFrame:SetMovable(true)
 MainFrame:SetClampedToScreen(true)
 MainFrame:SetFrameStrata("HIGH")
--- MOVE FIX 2: Alapból kikapcsolva, hogy ne blokkoljon
 MainFrame:EnableMouse(false)
 
 local function CreateHelperIcon(parent, texture)
@@ -87,29 +88,34 @@ local function CreateHelperIcon(parent, texture)
     f.Icon = f:CreateTexture(nil, "BORDER")
     f.Icon:SetAllPoints(f)
     f.Icon:SetTexture(texture)
-    f.Icon:SetDesaturated(true)
+    f.Icon:SetDesaturated(false) 
+    
     f.CD = CreateFrame("Cooldown", nil, f, "CooldownFrameTemplate")
     f.CD:SetAllPoints(f)
+    
+    -- JAVÍTÁS: Kisebb betűtípus (Huge helyett Normal) és körvonal a láthatóságért
+    f.TimeText = f:CreateFontString(nil, "OVERLAY")
+    f.TimeText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE") 
+    f.TimeText:SetPoint("CENTER", f, "CENTER", 0, 0)
+    f.TimeText:SetTextColor(1, 1, 0) 
+    
     f.Glow = f:CreateTexture(nil, "BACKGROUND")
     f.Glow:SetPoint("CENTER", f); f.Glow:SetSize(SMALL_ICON_SIZE + 8, SMALL_ICON_SIZE + 8)
     f.Glow:SetTexture("Interface\\Buttons\\CheckButtonHilight"); f.Glow:SetBlendMode("ADD"); f.Glow:Hide()
     return f
 end
 
--- Felső sor (Buffok/Debuffok)
 local AspectFrame = CreateHelperIcon(MainFrame, "Interface\\Icons\\INV_Misc_QuestionMark")
 local BuffFrame = CreateHelperIcon(MainFrame, "Interface\\Icons\\Ability_TrueShot")
 local MarkFrame = CreateHelperIcon(MainFrame, "Interface\\Icons\\Ability_Hunter_Snipershot")
 local StingFrame = CreateHelperIcon(MainFrame, "Interface\\Icons\\Ability_Hunter_Quickshot")
 
--- Felső sor pozíciója (Pontosan az eredeti koordináták)
 local topRowWidth = (SMALL_ICON_SIZE * 4) + (SPACING * 3)
 AspectFrame:SetPoint("BOTTOMLEFT", MainFrame, "TOPLEFT", (200 - topRowWidth)/2, 8)
 BuffFrame:SetPoint("LEFT", AspectFrame, "RIGHT", SPACING, 0)
 MarkFrame:SetPoint("LEFT", BuffFrame, "RIGHT", SPACING, 0)
 StingFrame:SetPoint("LEFT", MarkFrame, "RIGHT", SPACING, 0)
 
--- Rotációs ikonok (Alsó sor)
 MainFrame.PredictionIcons = {}
 for i = 1, 4 do
     local icon = MainFrame:CreateTexture(nil, "ARTWORK")
@@ -118,7 +124,6 @@ for i = 1, 4 do
     MainFrame.PredictionIcons[i] = icon
 end
 
--- Függvény a rotáció középre igazításához
 local function UpdateRotationLayout()
     local totalWidth = 0
     for i = 1, predictionCount do
@@ -142,7 +147,6 @@ local function UpdateRotationLayout()
     end
 end
 
--- Logic
 local function IsReady(spellID, offset)
     local name = GetSpellInfo(spellID)
     if not name then return false end
@@ -164,7 +168,7 @@ function MainFrame:GetNextSpell(offset, used)
     if offset == 0 and not UnitDebuff("target", ssName, nil, "PLAYER") then return 1978 end
     if IsReady(53209, offset) and not used[53209] then return 53209 end
     if IsReady(49050, offset) and not used[49050] then return 49050 end
-    if IsReady(49045, offset) and not used[49045] then return 49045 end
+    if i == 1 and IsReady(49045, offset) and not used[49045] then return 49045 end
     return 49052
 end
 
@@ -185,24 +189,34 @@ MainFrame:SetScript("OnUpdate", function(self, elapsed)
     for i = 1, 40 do
         local name, _, icon = UnitBuff("player", i)
         if name and (name:find("Aspect") or name:find("Aspektus")) then
-            AspectFrame.Icon:SetTexture(icon); AspectFrame.Icon:SetDesaturated(false); AspectFrame.Glow:Hide()
+            AspectFrame.Icon:SetTexture(icon); AspectFrame.Glow:Hide()
             hasAspect = true break
         end
     end
     if not hasAspect then AspectFrame.Icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark"); AspectFrame.Glow:Show() end
 
-    -- Status sor
-    BuffFrame.Icon:SetDesaturated(not UnitBuff("player", GetSpellInfo(19506)))
+    -- Buff (Trueshot) - Glow nélkül
+    BuffFrame.Glow:Hide()
     
-    -- HUNTER'S MARK FIX: Eredeti sor helyett biztosabb lekérés
+    -- Hunter's Mark visszaszámláló (Kisebb betűk)
     local hmName = GetSpellInfo(1130)
     local _, _, _, _, _, hmDur, hmExp = UnitDebuff("target", hmName)
-    MarkFrame.Icon:SetDesaturated(not hmExp); MarkFrame.CD:SetCooldown(hmExp and (hmExp - hmDur) or 0, hmDur or 0)
+    if hmExp then
+        local timeLeft = hmExp - GetTime()
+        MarkFrame.TimeText:SetFormattedText("%d", timeLeft)
+    else
+        MarkFrame.TimeText:SetText("")
+    end
     
+    -- Serpent Sting visszaszámláló (Kisebb betűk)
     local _, _, _, _, _, ssDur, ssExp = UnitDebuff("target", GetSpellInfo(1978), nil, "PLAYER")
-    StingFrame.Icon:SetDesaturated(not ssExp); StingFrame.CD:SetCooldown(ssExp and (ssExp - ssDur) or 0, ssDur or 0)
+    if ssExp then
+        local timeLeft = ssExp - GetTime()
+        StingFrame.TimeText:SetFormattedText("%d", timeLeft)
+    else
+        StingFrame.TimeText:SetText("")
+    end
 
-    -- Rotation & Layout
     UpdateRotationLayout()
     local used, offset = {}, 0
     for i = 1, predictionCount do
@@ -214,28 +228,30 @@ MainFrame:SetScript("OnUpdate", function(self, elapsed)
     end
 end)
 
--- Movement
 MainFrame:SetScript("OnMouseDown", function(self, button) if button == "LeftButton" and not isLocked then self:StartMoving() end end)
 MainFrame:SetScript("OnMouseUp", function(self) self:StopMovingOrSizing(); local p, _, rp, x, y = self:GetPoint()
-    if RotationHelperDB then RotationHelperDB.pos = {p, rp, x, y} end end)
+    if RotationHelperDB then RotationHelperDB.pos = {p, "UIParent", rp, x, y} end end)
 
 SLASH_ROTATIONHELPER1 = "/rh"
 SlashCmdList["ROTATIONHELPER"] = function()
     isLocked = not isLocked
     if RotationHelperDB then RotationHelperDB.isLocked = isLocked end
     RH_LockCheck_Global:SetChecked(isLocked)
-    -- MOVE FIX 3: Parancsra aktiváljuk az egeret
     MainFrame:EnableMouse(not isLocked)
     print("RotationHelper: " .. (isLocked and "|cFFFF0000Locked|r" or "|cFF00FF00Unlocked|r"))
 end
 
 MainFrame:RegisterEvent("PLAYER_LOGIN")
 MainFrame:SetScript("OnEvent", function(self)
-    if not RotationHelperDB then RotationHelperDB = { isLocked = true, visibilityMode = "ALWAYS", predictionCount = 2, pos = {"CENTER", "CENTER", 0, -150} } end
+    if not RotationHelperDB then RotationHelperDB = { isLocked = true, visibilityMode = "ALWAYS", predictionCount = 2, pos = {"CENTER", "UIParent", "CENTER", 0, -150} } end
     isLocked, visibilityMode, predictionCount = RotationHelperDB.isLocked, RotationHelperDB.visibilityMode, RotationHelperDB.predictionCount
-    self:ClearAllPoints(); self:SetPoint(RotationHelperDB.pos[1], UIParent, RotationHelperDB.pos[2], RotationHelperDB.pos[3], RotationHelperDB.pos[4])
+    self:ClearAllPoints()
+    if RotationHelperDB.pos and #RotationHelperDB.pos == 5 then
+        self:SetPoint(RotationHelperDB.pos[1], RotationHelperDB.pos[2], RotationHelperDB.pos[3], RotationHelperDB.pos[4], RotationHelperDB.pos[5])
+    else
+        self:SetPoint("CENTER", UIParent, "CENTER", 0, -150)
+    end
     RH_LockCheck_Global:SetChecked(isLocked)
-    -- MOVE FIX 4: Belépéskor beállítjuk
     self:EnableMouse(not isLocked)
     
     UIDropDownMenu_SetText(RH_VisDropdown, visibilityMode == "ALWAYS" and "Always On" or visibilityMode == "COMBAT" and "Target or Combat" or "Hide")

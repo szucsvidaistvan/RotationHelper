@@ -1,8 +1,8 @@
 ## Interface: 30300
 ## Author: Vida Istvan
-## Version: 1.0
+## Version: 1.1
 ## Title: RotationHelper
 ## Notes: Hunter RotationHelper.
-## SavedVariables: HunterHelperDB
+## SavedVariables: RotationHelperDB
 
 RotationHelper.lua
